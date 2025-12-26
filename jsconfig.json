@@ -1,0 +1,14 @@
+//rootdir->  jsonconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@modules/*": ["src/modules/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@utils/*": ["src/utils/*"],
+      "@config/*": ["config/*"],
+      "@db/*": ["config/db/*"]
+    }
+  },
+  "include": ["**/*"]
+}

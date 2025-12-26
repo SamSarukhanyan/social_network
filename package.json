@@ -1,0 +1,32 @@
+{
+  "name": "structure",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --exec \"node --loader ./src/esm-alias-loader.js\" src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "module-alias": "~2.2.3",
+    "mysql2": "^3.15.3",
+    "sequelize": "^6.37.7"
+  },
+  "_moduleAliases": {
+    "@modules": "src/modules",
+    "@modules/auth": "src/modules/auth",
+    "@modules/account": "src/modules/account",
+    "@middlewares": "src/middlewares",
+    "@utils": "src/utils",
+    "@config": "config",
+    "@db": "config/db"
+  }
+}
