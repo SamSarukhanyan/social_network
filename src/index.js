@@ -16,7 +16,7 @@ loadRoutes(app);
 
 app.use(errorMiddleware);
 
-db.sequelize.sync({ alter: true }).then(() => console.log("SYNC"));
+db.sequelize.sync().then(() => console.log("SYNC"));
 
 const PORT = process.env.APP_PORT;
 

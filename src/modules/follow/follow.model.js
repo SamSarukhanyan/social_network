@@ -24,8 +24,8 @@ export default function (sequelize, DataTypes) {
         onDelete: "CASCADE",
       },
       status: {
-        type: DataTypes.ENUM("requested", "followed"),
-        defaultValue: "requested",
+        type: DataTypes.ENUM("requested", "followed", "unfollowed"),
+        defaultValue: "unfollowed",
       },
     },
     {

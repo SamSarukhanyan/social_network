@@ -15,4 +15,17 @@ accountRouter.get(
   "/search/:text",
   accountController.search.bind(accountController)
 );
+
+accountRouter.get(
+  "/followers",
+  accountController.getFollowers.bind(accountController)
+);
+accountRouter.get(
+  "/followings",
+  accountController.getFollowings.bind(accountController)
+);
+accountRouter.post(
+  "/:id/follow",
+  accountController.follow.bind(accountController)
+);
 accountRouter.get("/:id", accountController.getById.bind(accountController));

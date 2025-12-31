@@ -9,10 +9,24 @@ export class AccountController {
   }
   async getById(req, res) {
     const account = await this.service.getAccountById(req.params.id);
-    res.status(200).send({ ok: true, payload: account });
+    res.status(200).send({ ok: true, payload: { account } });
   }
-  async getFollowers() {
-    const followers = this.service.getFollowers(req.user.id);
-    res.status(200).send({ ok: true, payload: { followers } });
+  async getFollowers(req, res) {
+    const users = await this.service.getFollowers(req.user.id);
+    res.status(200).send({ ok: true, payload: { users } });
+  }
+  async getFollowings(req, res) {
+    const users = await this.service.getFollowings(req.user.id);
+    res.status(200).send({ ok: true, payload: { users } });
+  }
+  async follow(req, res) {
+    const currentUserId = req.user.id;
+    const targetUserId = +req.params.id;
+
+    const { status, targetUser } = await this.service.follow(
+      currentUserId,
+      targetUserId
+    );
+    res.status(200).send({ status, targetUser });
   }
 }

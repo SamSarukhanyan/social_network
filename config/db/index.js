@@ -16,40 +16,41 @@ models.User = UserModel(sequelize, DataTypes);
 models.Follow = FollowModel(sequelize, DataTypes);
 models.Post = PostModel(sequelize, DataTypes);
 models.PostImage = PostImageModel(sequelize, DataTypes);
+const { User, Follow, Post, PostImage } = models;
 
 // associations
-models.User.belongsToMany(models.User, {
-  through: models.Follow,
+User.belongsToMany(User, {
+  through: Follow,
   as: "Followers",
   foreignKey: "followingId",
   otherKey: "followerId",
 });
 
-models.User.belongsToMany(models.User, {
-  through: models.Follow,
+User.belongsToMany(User, {
+  through: Follow,
   as: "Followings",
   foreignKey: "followerId",
   otherKey: "followingId",
 });
-models.User.hasMany(models.Post, {
+User.hasMany(Post, {
   foreignKey: "userId",
   as: "posts",
   onDelete: "CASCADE",
 });
-models.User.hasMany(models.Follow, {
+User.hasMany(Follow, {
   foreignKey: "followerId",
   onDelete: "CASCADE",
 });
-models.User.hasMany(models.Follow, {
+User.hasMany(Follow, {
   foreignKey: "followingId",
   onDelete: "CASCADE",
 });
-models.Post.belongsTo(models.User, {
+Post.belongsTo(User, {
   foreignKey: "userId",
   as: "author",
 });
-models.PostImage.belongsTo(models.Post, { foreignKey: "postId" });
-models.Post.hasMany(models.PostImage, {
+PostImage.belongsTo(Post, { foreignKey: "postId" });
+Post.hasMany(PostImage, {
   foreignKey: "postId",
   as: "images",
   onDelete: "CASCADE",

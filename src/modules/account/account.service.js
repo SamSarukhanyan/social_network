@@ -1,4 +1,5 @@
 //account.service.js
+import { USER_PUBLIC_FIELDS } from "@modules/auth/constants/user.attributes.js";
 import { AppError } from "@utils/appError.js";
 import { Op } from "sequelize";
 
@@ -13,13 +14,13 @@ export class AccountService {
       where: {
         name: { [Op.like]: `${text}%` },
       },
-      attributes: ["name", "surname", "username", "picture_url"],
+      attributes: USER_PUBLIC_FIELDS,
     });
     return founds || [];
   }
   async getAccountById(id) {
     const account = await this.User.findByPk(id);
-    if (!account) throw new AppError("Account not found", 404);
+    if (!account) throw new AppError("Account not founddd", 404);
 
     const followersCount = await this.Follow.count({
       where: {
@@ -52,18 +53,78 @@ export class AccountService {
 
   async getFollowers(userId) {
     const user = await this.User.findByPk(userId, {
+      attributes: ["id"],
       include: [
         {
           model: this.User,
           as: "Followers",
-          attributes: ["id", "name", "surname", "username", "picture_url"],
-          through: { attributes: [] },
+          attributes: USER_PUBLIC_FIELDS,
+          through: {
+            where: { status: "followed" },
+            attributes: [],
+          },
         },
       ],
     });
 
-    if (!user) return [];
+    if (!user) throw new AppError("User not found", 404);
 
-    return user.Followers;
+    return user.Followers.length ? user.followers : [];
+  }
+  async getFollowings(userId) {
+    const user = await this.User.findByPk(userId, {
+      attributes: ["id"],
+      include: [
+        {
+          model: this.User,
+          as: "Followings",
+          attributes: USER_PUBLIC_FIELDS,
+          through: {
+            where: { status: "followed" },
+            attributes: [],
+          },
+        },
+      ],
+    });
+
+    if (!user) throw new AppError("User not found", 404);
+
+    return user.Followings;
+  }
+
+  async follow(curr, target) {
+    if (curr == target) throw new AppError("bad request", 400);
+    const targetUser = await this.User.findByPk(target);
+    if (!targetUser) throw new AppError("User not found", 404);
+
+    const [follow, created] = await this.Follow.findOrCreate({
+      where: {
+        followerId: curr,
+        followingId: target,
+      },
+      defaults: {
+        status: targetUser.isPrivate ? "requested" : "followed",
+      },
+    });
+    if (!created) {
+      switch (follow.status) {
+        case "followed":
+          follow.status = "unfollowed";
+          break;
+        case "requested":
+          follow.status = "unfollowed";
+          break;
+        case "unfollowed":
+          follow.status = targetUser.isPrivate ? "requested" : "followed";
+          break;
+      }
+    }
+    await follow.save();
+    return {
+      status: follow.status,
+      targetUser: targetUser.toJSON(),
+    };
+
+    return;
   }
 }
