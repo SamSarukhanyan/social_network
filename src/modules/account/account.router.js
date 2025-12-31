@@ -24,6 +24,14 @@ accountRouter.get(
   "/followings",
   accountController.getFollowings.bind(accountController)
 );
+accountRouter.get(
+  "/requests",
+  accountController.requests.bind(accountController)
+);
+accountRouter.patch(
+  "/request/:id/accept",
+  accountController.acceptFollow.bind(accountController)
+);
 accountRouter.post(
   "/:id/follow",
   accountController.follow.bind(accountController)

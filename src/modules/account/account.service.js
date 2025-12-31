@@ -1,7 +1,7 @@
 //account.service.js
 import { USER_PUBLIC_FIELDS } from "@modules/auth/constants/user.attributes.js";
 import { AppError } from "@utils/appError.js";
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 
 export class AccountService {
   constructor(User, Follow, Post) {
@@ -69,7 +69,7 @@ export class AccountService {
 
     if (!user) throw new AppError("User not found", 404);
 
-    return user.Followers.length ? user.followers : [];
+    return user.Followers || [];
   }
   async getFollowings(userId) {
     const user = await this.User.findByPk(userId, {
@@ -124,7 +124,39 @@ export class AccountService {
       status: follow.status,
       targetUser: targetUser.toJSON(),
     };
+  }
+  async getRequests(currUserid) {
+    const requests = await this.Follow.findAll({
+      where: {
+        followingId: currUserid,
+        status: "requested",
+      },
+      include: [
+        {
+          model: this.User,
+          as: "sender",
+          attributes: USER_PUBLIC_FIELDS,
+        },
+      ],
+    });
 
-    return;
+    const plain = requests.map((r) => {
+      const p = r.get({ plain: true });
+      return {
+        sender: p.sender,
+      };
+    });
+    return plain;
+  }
+  async acceptFollow(currUserId, requestId) {
+    const request = await this.Follow.findByPk(requestId);
+    if (!request) throw new AppError("Request not found", 404);
+    if (request.followingId !== currUserId)
+      throw new AppError("Forbidden", 403);
+    if (request.status !== "requested")
+      throw new AppError("Invalid request state", 400);
+    request.status = "followed";
+    await request.save();
+    return request.status;
   }
 }

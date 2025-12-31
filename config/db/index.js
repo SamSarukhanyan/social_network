@@ -45,6 +45,10 @@ User.hasMany(Follow, {
   foreignKey: "followingId",
   onDelete: "CASCADE",
 });
+Follow.belongsTo(User, {
+  foreignKey: "followerId",
+  as: "sender",
+});
 Post.belongsTo(User, {
   foreignKey: "userId",
   as: "author",

@@ -27,6 +27,16 @@ export class AccountController {
       currentUserId,
       targetUserId
     );
-    res.status(200).send({ status, targetUser });
+    res.status(200).send({ ok: true, payload: { status, targetUser } });
+  }
+  async requests(req, res) {
+    const requests = await this.service.getRequests(req.user.id);
+    res.status(200).send({ ok: true, users: requests });
+  }
+  async acceptFollow(req, res) {
+    const currUserId = req.user.id;
+    const requestId = req.params.id;
+    const status = await this.service.acceptFollow(currUserId, requestId);
+    res.status(200).send({ ok: true, status });
   }
 }
