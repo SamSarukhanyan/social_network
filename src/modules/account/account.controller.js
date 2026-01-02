@@ -39,4 +39,10 @@ export class AccountController {
     const status = await this.service.acceptFollow(currUserId, requestId);
     res.status(200).send({ ok: true, status });
   }
+  async declineFollow(req, res) {
+    const currUserId = req.user.id;
+    const requestId = req.params.id;
+    const status = await this.service.declineFollow(currUserId, requestId);
+    res.status(200).send({ ok: true, status });
+  }
 }

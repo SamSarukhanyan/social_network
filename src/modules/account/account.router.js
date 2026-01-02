@@ -3,37 +3,45 @@ import { isAuthenticated } from "@modules/account/middlewares/isAuthenticate.js"
 import { AccountService } from "@modules/account/account.service.js";
 import db from "@db/index.js";
 import { AccountController } from "@modules/account/account.controller.js";
+import { asyncHandler } from "@middlewares/async.Handler.js";
 
 export const accountRouter = express.Router();
 
 const accountService = new AccountService(db.User, db.Follow, db.Post);
 const accountController = new AccountController(accountService);
 
-accountRouter.use(isAuthenticated);
+accountRouter.use(asyncHandler(isAuthenticated));
 
 accountRouter.get(
   "/search/:text",
-  accountController.search.bind(accountController)
+  asyncHandler(accountController.search.bind(accountController))
 );
 
 accountRouter.get(
   "/followers",
-  accountController.getFollowers.bind(accountController)
+  asyncHandler(accountController.getFollowers.bind(accountController))
 );
 accountRouter.get(
   "/followings",
-  accountController.getFollowings.bind(accountController)
+  asyncHandler(accountController.getFollowings.bind(accountController))
 );
 accountRouter.get(
   "/requests",
-  accountController.requests.bind(accountController)
+  asyncHandler(accountController.requests.bind(accountController))
 );
 accountRouter.patch(
   "/request/:id/accept",
-  accountController.acceptFollow.bind(accountController)
+  asyncHandler(accountController.acceptFollow.bind(accountController))
+);
+accountRouter.patch(
+  "/request/:id/decline",
+  asyncHandler(accountController.declineFollow.bind(accountController))
 );
 accountRouter.post(
   "/:id/follow",
-  accountController.follow.bind(accountController)
+  asyncHandler(accountController.follow.bind(accountController))
 );
-accountRouter.get("/:id", accountController.getById.bind(accountController));
+accountRouter.get(
+  "/:id",
+  asyncHandler(accountController.getById.bind(accountController))
+);

@@ -1,7 +1,7 @@
 //account.service.js
 import { USER_PUBLIC_FIELDS } from "@modules/auth/constants/user.attributes.js";
 import { AppError } from "@utils/appError.js";
-import { Op, where } from "sequelize";
+import { Op } from "sequelize";
 
 export class AccountService {
   constructor(User, Follow, Post) {
@@ -50,7 +50,6 @@ export class AccountService {
       },
     };
   }
-
   async getFollowers(userId) {
     const user = await this.User.findByPk(userId, {
       attributes: ["id"],
@@ -91,7 +90,6 @@ export class AccountService {
 
     return user.Followings;
   }
-
   async follow(curr, target) {
     if (curr == target) throw new AppError("bad request", 400);
     const targetUser = await this.User.findByPk(target);
@@ -156,6 +154,17 @@ export class AccountService {
     if (request.status !== "requested")
       throw new AppError("Invalid request state", 400);
     request.status = "followed";
+    await request.save();
+    return request.status;
+  }
+  async declineFollow(currUserId, requestId) {
+    const request = await this.Follow.findByPk(requestId);
+    if (!request) throw new AppError("Request not found", 404);
+    if (request.followingId !== currUserId)
+      throw new AppError("Forbidden", 403);
+    if (request.status !== "requested")
+      throw new AppError("Invalid request state", 400);
+    request.status = "unfollowed";
     await request.save();
     return request.status;
   }

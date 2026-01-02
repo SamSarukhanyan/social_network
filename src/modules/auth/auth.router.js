@@ -8,6 +8,7 @@ import { passwordHash } from "@modules/auth/middlewares/passwordPipe.js";
 import { loginValidator } from "@modules/auth/validators/login.validator.js";
 import { isAuthenticated } from "@modules/auth/middlewares/isAuthenticate.js";
 import { changeUsernameValidator } from "@modules/auth/validators/changeUsername.validator.js";
+import { asyncHandler } from "@middlewares/async.Handler.js";
 
 export const authRouter = express.Router();
 
@@ -16,22 +17,26 @@ const authController = new AuthController(authService);
 
 authRouter.post(
   "/signup",
-  [signupValidator.bind(null, authService), passwordHash],
-  authController.signup.bind(authController)
+  asyncHandler(signupValidator.bind(null, authService)),
+  asyncHandler(passwordHash),
+  asyncHandler(authController.signup.bind(authController))
 );
 authRouter.post(
   "/login",
-  [loginValidator.bind(null, authService)],
-  authController.login.bind(authController)
+  asyncHandler(loginValidator.bind(null, authService)),
+  asyncHandler(authController.login.bind(authController))
 );
-authRouter.use(isAuthenticated);
-authRouter.get("/user", authController.getAuthUser.bind(authController));
+authRouter.use(asyncHandler(isAuthenticated));
+authRouter.get(
+  "/user",
+  asyncHandler(authController.getAuthUser.bind(authController))
+);
 authRouter.patch(
   "/user/username",
-  changeUsernameValidator,
-  authController.changeUsername.bind(authController)
+  asyncHandler(changeUsernameValidator),
+  asyncHandler(authController.changeUsername.bind(authController))
 );
 authRouter.patch(
   "/user/privacy",
-  authController.changePrivacy.bind(authController)
+  asyncHandler(authController.changePrivacy.bind(authController))
 );

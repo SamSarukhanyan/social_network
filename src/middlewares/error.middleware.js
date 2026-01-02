@@ -1,3 +1,4 @@
+//// src/middlewares/error.middleware.js
 export const errorMiddleware = (err, req, res, next) => {
   // defaults
   err.statusCode = err.statusCode || 500;

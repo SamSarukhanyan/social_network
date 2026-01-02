@@ -12,7 +12,6 @@ export class AuthService {
       .scope("withPassword")
       .findOne({ where: { username } });
   }
-
   async getUserById(id) {
     const user = await this.userModel.scope("withPassword").findByPk(id);
     if (!user) throw new AppError("User not found", 404);
@@ -23,7 +22,6 @@ export class AuthService {
     const { password: _, ...safeUser } = createdUser.toJSON();
     return safeUser;
   }
-
   async generateToken(user, password) {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new AppError("Invalid password", 400);
@@ -32,7 +30,6 @@ export class AuthService {
       expiresIn: "20d",
     });
   }
-
   async updateUsername(userId, newUserName, password) {
     const user = await this.userModel.scope("withPassword").findByPk(userId);
     if (!user) throw new AppError("User not found", 404);
@@ -51,7 +48,6 @@ export class AuthService {
     const { password: _, ...safeUser } = user.toJSON();
     return safeUser;
   }
-
   async updatePrivacy(id, isPrivate) {
     const user = await this.userModel.findByPk(id);
     if (!user) throw new AppError("User not found", 404);
