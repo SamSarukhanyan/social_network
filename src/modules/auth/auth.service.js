@@ -3,8 +3,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export class AuthService {
-  constructor(userModel) {
+  constructor(userModel, Post, sequelize) {
     this.userModel = userModel;
+    this.postmodel = Post;
+    this.sequelize = sequelize;
   }
 
   async findByUsername(username) {
@@ -18,9 +20,11 @@ export class AuthService {
     return user;
   }
   async createUser(user) {
-    const createdUser = await this.userModel.create(user);
-    const { password: _, ...safeUser } = createdUser.toJSON();
-    return safeUser;
+    return this.sequelize.transaction(async (transaction) => {
+      const createdUser = await this.userModel.create(user, { transaction });
+      const { password: _, ...safeUser } = createdUser.toJSON();
+      return safeUser;
+    });
   }
   async generateToken(user, password) {
     const isMatch = await bcrypt.compare(password, user.password);

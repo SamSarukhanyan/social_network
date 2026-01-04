@@ -4,15 +4,15 @@ import { AuthController } from "@modules/auth/auth.controller.js";
 import { AuthService } from "@modules/auth/auth.service.js";
 import { signupValidator } from "@modules/auth/validators/signup.validator.js";
 import db from "@db/index.js";
-import { passwordHash } from "@modules/auth/middlewares/passwordPipe.js";
+import { passwordHash } from "@middlewares/passwordPipe.js";
 import { loginValidator } from "@modules/auth/validators/login.validator.js";
-import { isAuthenticated } from "@modules/auth/middlewares/isAuthenticate.js";
 import { changeUsernameValidator } from "@modules/auth/validators/changeUsername.validator.js";
 import { asyncHandler } from "@middlewares/async.Handler.js";
+import { isAuthenticated } from "@middlewares/isAuthenticate.js";
 
 export const authRouter = express.Router();
 
-const authService = new AuthService(db.User);
+const authService = new AuthService(db.User, db.Post, db.sequelize);
 const authController = new AuthController(authService);
 
 authRouter.post(
@@ -26,7 +26,7 @@ authRouter.post(
   asyncHandler(loginValidator.bind(null, authService)),
   asyncHandler(authController.login.bind(authController))
 );
-authRouter.use(asyncHandler(isAuthenticated));
+authRouter.use(isAuthenticated(db.User));
 authRouter.get(
   "/user",
   asyncHandler(authController.getAuthUser.bind(authController))

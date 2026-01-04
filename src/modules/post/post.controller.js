@@ -1,4 +1,5 @@
 //post.controller.js
+import { CommentService } from "@modules/comment/comment.service.js";
 export class PostController {
   constructor(service) {
     this.service = service;
@@ -6,7 +7,6 @@ export class PostController {
 
   async getPosts(req, res) {
     const posts = await this.service.getPosts(req.user.id);
-    console.log(posts);
 
     return res.status(200).json({
       ok: true,
@@ -14,20 +14,27 @@ export class PostController {
     });
   }
   async createPost(req, res) {
-    try {
-      const post = await this.service.createPost(
-        req.user.id,
-        req.body,
-        req.files
-      );
-      return res.status(201).json({ ok: true, data: post });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ ok: false, message: err.message });
-    }
+    const post = await this.service.createPost(
+      req.user.id,
+      req.body,
+      req.files
+    );
+    return res.status(201).json({ ok: true, data: post });
   }
   async getPostById(req, res) {
     const post = await this.service.getPostById(req.user.id, req.params.id);
     res.status(200).json({ ok: true, data: post });
+  }
+  async likePost(req, res) {
+    const currUserId = req.user.id;
+    const postId = +req.params.id;
+    const status = await this.service.likePost(currUserId, postId);
+    res.status(201).json({ ok: true, data: status });
+  }
+  async addComment(req, res) {
+    const currUserId = req.user.id;
+    const postId = +req.params.id;
+    const text = req.body;
+    await this.CommentService.createComment(currUserId, postId, text);
   }
 }

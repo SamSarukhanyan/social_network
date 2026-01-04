@@ -4,10 +4,11 @@ import { AppError } from "@utils/appError.js";
 import { Op } from "sequelize";
 
 export class AccountService {
-  constructor(User, Follow, Post) {
+  constructor(User, Follow, Post, sequelize) {
     this.User = User;
     this.Follow = Follow;
     this.Post = Post;
+    this.sequelize = sequelize;
   }
   async searchByUserName(text) {
     const founds = await this.User.findAll({
@@ -91,37 +92,35 @@ export class AccountService {
     return user.Followings;
   }
   async follow(curr, target) {
-    if (curr == target) throw new AppError("bad request", 400);
-    const targetUser = await this.User.findByPk(target);
-    if (!targetUser) throw new AppError("User not found", 404);
+    return this.sequelize.transaction(async (transaction) => {
+      if (curr == target) throw new AppError("bad request", 400);
+      const targetUser = await this.User.findByPk(target);
+      if (!targetUser) throw new AppError("User not found", 404);
 
-    const [follow, created] = await this.Follow.findOrCreate({
-      where: {
-        followerId: curr,
-        followingId: target,
-      },
-      defaults: {
-        status: targetUser.isPrivate ? "requested" : "followed",
-      },
-    });
-    if (!created) {
-      switch (follow.status) {
-        case "followed":
-          follow.status = "unfollowed";
-          break;
-        case "requested":
-          follow.status = "unfollowed";
-          break;
-        case "unfollowed":
-          follow.status = targetUser.isPrivate ? "requested" : "followed";
-          break;
+      const [follow, created] = await this.Follow.findOrCreate({
+        where: {
+          followerId: curr,
+          followingId: target,
+        },
+        defaults: {
+          status: targetUser.isPrivate ? "requested" : "followed",
+        },
+        transaction,
+      });
+      if (!created) {
+        follow.status =
+          follow.status === "unfollowed"
+            ? targetUser.isPrivate
+              ? "requested"
+              : "followed"
+            : "unfollowed";
       }
-    }
-    await follow.save();
-    return {
-      status: follow.status,
-      targetUser: targetUser.toJSON(),
-    };
+      await follow.save({ transaction });
+      return {
+        status: follow.status,
+        targetUser: targetUser.toJSON(),
+      };
+    });
   }
   async getRequests(currUserid) {
     const requests = await this.Follow.findAll({

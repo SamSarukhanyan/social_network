@@ -1,16 +1,21 @@
 import express from "express";
-import { isAuthenticated } from "@modules/account/middlewares/isAuthenticate.js";
 import { AccountService } from "@modules/account/account.service.js";
 import db from "@db/index.js";
 import { AccountController } from "@modules/account/account.controller.js";
 import { asyncHandler } from "@middlewares/async.Handler.js";
+import { isAuthenticated } from "@middlewares/isAuthenticate.js";
 
 export const accountRouter = express.Router();
 
-const accountService = new AccountService(db.User, db.Follow, db.Post);
+const accountService = new AccountService(
+  db.User,
+  db.Follow,
+  db.Post,
+  db.sequelize
+);
 const accountController = new AccountController(accountService);
 
-accountRouter.use(asyncHandler(isAuthenticated));
+accountRouter.use(isAuthenticated(db.User));
 
 accountRouter.get(
   "/search/:text",
