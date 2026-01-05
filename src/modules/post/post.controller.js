@@ -1,5 +1,4 @@
 //post.controller.js
-import { CommentService } from "@modules/comment/comment.service.js";
 export class PostController {
   constructor(service) {
     this.service = service;

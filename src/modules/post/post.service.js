@@ -62,7 +62,6 @@ export class PostService {
         return post.get({ plain: true });
       });
     } catch (err) {
-      // Cleanup uploaded files if transaction fails
       await this.cleanupFiles(uploadedPaths);
       throw err;
     }
@@ -117,7 +116,6 @@ export class PostService {
     const plain = post.get({ plain: true });
     const author = plain.author;
 
-    // 🔐 permission check
     if (author.id !== currUserId && author.isPrivate) {
       const follow = await this.Follow.findOne({
         where: {
@@ -132,7 +130,6 @@ export class PostService {
       }
     }
 
-    // 📦 build response
     const likedUsers = plain.postLikes.map((l) => l.likeAuthor);
 
     return {
