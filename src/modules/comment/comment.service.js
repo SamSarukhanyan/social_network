@@ -19,7 +19,7 @@ export class CommentService {
         },
         { transaction }
       );
-      console.log(comment.get({ plain: true }));
+      return comment.get({ plain: true });
     });
   }
 }

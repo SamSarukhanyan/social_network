@@ -17,7 +17,7 @@ export class PostService {
     this.User = userModel;
     this.PostImage = PostImage;
     this.Like = likeModel;
-    this.commentService = CommentService;
+    this.Comment = CommentService;
     this.Follow = followModel;
   }
 
@@ -83,62 +83,72 @@ export class PostService {
         {
           model: this.User,
           as: "author",
-          attributes: ["name", "surname", "isPrivate", "id"],
+          attributes: ["id", "name", "surname", "isPrivate"],
         },
         {
           model: this.PostImage,
           as: "images",
+          required: false,
           attributes: ["image_url"],
+        },
+        {
+          model: this.Comment,
+          as: "comments",
+          required: false,
         },
         {
           model: this.Like,
           as: "postLikes",
-          attributes: ["userId"],
+          where: { status: true },
+          required: false,
           include: [
             {
               model: this.User,
               as: "likeAuthor",
-              attributes: ["name", "username"],
+              attributes: ["id", "name", "username"],
             },
           ],
         },
       ],
     });
+
     if (!post) throw new AppError("Post not found", 404);
+
     const plain = post.get({ plain: true });
+    const author = plain.author;
 
-    const likesCount = await this.Like.count({
-      where: {
-        postId: plain.id,
-      },
-    });
+    // 🔐 permission check
+    if (author.id !== currUserId && author.isPrivate) {
+      const follow = await this.Follow.findOne({
+        where: {
+          followerId: currUserId,
+          followingId: author.id,
+          status: "followed",
+        },
+      });
 
-    const users = plain.postLikes.map((elm) => {
-      return elm.likeAuthor;
-    });
+      if (!follow) {
+        throw new AppError("You cannot view this post", 403);
+      }
+    }
 
-    const postPublic = {
+    // 📦 build response
+    const likedUsers = plain.postLikes.map((l) => l.likeAuthor);
+
+    return {
+      id: plain.id,
       description: plain.description,
       title: plain.title,
-      images: plain.images.map((img) => ({ image_url: img.image_url })),
+      images: plain.images.map((i) => ({ image_url: i.image_url })),
       author: {
-        name: plain.author.name,
-        surname: plain.author.surname,
+        name: author.name,
+        surname: author.surname,
       },
-      likes: { count: likesCount, likedUsers: users },
+      likesCount: likedUsers.length,
+      commentsCount: plain.comments.length,
     };
-
-    const author = plain.author;
-    if (author.id === currUserId) return postPublic;
-    if (!author.isPrivate) return postPublic;
-    const follow = await this.Follow.findOne({
-      where: { followerId: currUserId, followingId: author.id },
-    });
-    if (!follow || follow.status !== "followed") {
-      throw new AppError("You cannot view this post", 403);
-    }
-    return postPublic;
   }
+
   async likePost(currUserId, postId) {
     return this.sequelize.transaction(async (transaction) => {
       const [like, created] = await this.Like.findOrCreate({

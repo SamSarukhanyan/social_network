@@ -12,9 +12,7 @@ export class AccountService {
   }
   async searchByUserName(text) {
     const founds = await this.User.findAll({
-      where: {
-        name: { [Op.like]: `${text}%` },
-      },
+      where: { name: { [Op.like]: `${text}%` } },
       attributes: USER_PUBLIC_FIELDS,
     });
     return founds || [];

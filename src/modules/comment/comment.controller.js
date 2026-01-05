@@ -5,7 +5,7 @@ export class CommentController {
   async addComment(req, res) {
     const currUserId = req.user.id;
     const postId = +req.params.id;
-    const text = req.body;
-    await this.service.addComment(currUserId, postId, req.body);
+    const comment = await this.service.addComment(currUserId, postId, req.body);
+    res.status(201).json({ ok: true, data: comment });
   }
 }

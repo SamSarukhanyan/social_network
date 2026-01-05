@@ -10,7 +10,7 @@ const commentController = new CommentController(commentService);
 
 export const commentRouter = express.Router({ mergeParams: true });
 
-commentRouter.use(isAuthenticated);
+commentRouter.use(isAuthenticated(db.User));
 commentRouter.post(
   "/",
   asyncHandler(commentController.addComment.bind(commentController))
