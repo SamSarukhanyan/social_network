@@ -100,4 +100,13 @@ Comment.belongsTo(Post, {
   foreignKey: "postId",
   as: "post",
 });
+User.hasMany(Comment, {
+  foreignKey: "userId",
+  as: "userComments",
+  onDelete: "CASCADE",
+});
+Comment.belongsTo(User, {
+  foreignKey: "userId",
+  as: "User",
+});
 export default models;

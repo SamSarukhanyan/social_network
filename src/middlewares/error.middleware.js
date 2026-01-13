@@ -13,9 +13,16 @@ export const errorMiddleware = (err, req, res, next) => {
 
   // Unexpected / programming error
   console.error("UNEXPECTED ERROR:", err);
+  console.error("Error stack:", err.stack);
+  console.error("Request URL:", req.url);
+  console.error("Request method:", req.method);
 
   return res.status(500).json({
     ok: false,
     message: "Internal Server Error",
+    ...(process.env.NODE_ENV === 'development' && { 
+      error: err.message,
+      stack: err.stack 
+    }),
   });
 };

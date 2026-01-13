@@ -19,7 +19,36 @@ export class CommentService {
         },
         { transaction }
       );
-      return comment.get({ plain: true });
+      
+      // Fetch comment with user data
+      const User = this.sequelize.models.User;
+      const commentWithUser = await this.Comment.findByPk(comment.id, {
+        include: [
+          {
+            model: User,
+            as: "User", // Must match the alias in Comment.belongsTo(User, { as: "User" })
+            attributes: ["id", "name", "surname", "username", "picture_url"],
+          },
+        ],
+        transaction,
+      });
+      
+      const plain = commentWithUser.get({ plain: true });
+      const user = plain.User || {};
+      
+      return {
+        id: plain.id,
+        text: plain.text,
+        userId: plain.userId,
+        postId: plain.postId,
+        author: {
+          id: user.id || plain.userId,
+          name: user.name || '',
+          surname: user.surname || '',
+          username: user.username || '',
+          picture_url: user.picture_url || null,
+        },
+      };
     });
   }
 }

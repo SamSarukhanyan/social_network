@@ -5,7 +5,10 @@ export class PostController {
   }
 
   async getPosts(req, res) {
-    const posts = await this.service.getPosts(req.user.id);
+    // Support both current user and specific user ID
+    const userId = req.query.userId ? parseInt(req.query.userId) : req.user.id;
+    const currUserId = req.user.id; // Current authenticated user for liked status
+    const posts = await this.service.getPosts(userId, currUserId);
 
     return res.status(200).json({
       ok: true,

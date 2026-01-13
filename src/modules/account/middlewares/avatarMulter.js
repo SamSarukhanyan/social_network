@@ -1,25 +1,25 @@
-// multer.js
+// avatarMulter.js
 import multer from "multer";
 import path from "path";
 import crypto from "crypto";
 import { AppError } from "@utils/appError.js";
 
 /**
- * Multer Configuration for Post Image Uploads
+ * Multer Configuration for Avatar (Profile Picture) Uploads
  * 
- * Field name: "photos" (must match frontend FormData)
- * Max files: 10
- * Max file size: 5MB per file
+ * Field name: "avatar" (must match frontend FormData)
+ * Max files: 1 (single file)
+ * Max file size: 5MB
  * Allowed types: jpeg, jpg, png, gif
  */
 
 /**
  * Disk storage configuration
- * Files are saved to "uploads/posts" directory
+ * Files are saved to "uploads/avatars" directory
  */
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, "uploads/posts");
+    cb(null, "uploads/avatars");
   },
 
   /**
@@ -59,23 +59,22 @@ function fileFilter(req, file, cb) {
 }
 
 /**
- * Multer upload middleware
+ * Multer upload middleware for single avatar file
  * 
  * Configuration:
- * - Field name: "photos" (CRITICAL: must match frontend FormData field name)
- * - Max files: 10
- * - Max file size: 5MB per file
- * - Storage: disk storage in "uploads/posts" directory
+ * - Field name: "avatar" (CRITICAL: must match frontend FormData field name)
+ * - Max files: 1
+ * - Max file size: 5MB
+ * - Storage: disk storage in "uploads/avatars" directory
  * 
  * Usage:
- * - router.post("/", upload, controller.createPost)
- * - Files available in req.files (array)
+ * - router.post("/avatar", uploadAvatar, controller.uploadAvatar)
+ * - File available in req.file (single file object, not array!)
  */
-export const upload = multer({
+export const uploadAvatar = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB per file
-    files: 10, // Maximum 10 files
+    fileSize: 5 * 1024 * 1024, // 5MB
   },
   fileFilter,
-}).array("photos", 10); // Field name "photos", max 10 files
+}).single("avatar"); // Field name "avatar", single file

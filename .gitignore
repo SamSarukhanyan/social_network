@@ -1,11 +1,12 @@
 # Node modules
 node_modules/
-
+frontend
 # Environment variables
 .env
 .env.local
 .env.*.local
 
+package-lock.json
 # Logs
 npm-debug.log*
 yarn-debug.log*
