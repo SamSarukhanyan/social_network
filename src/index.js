@@ -1,4 +1,4 @@
-//index.js
+//social_network_backend/src/index.js
 import express from "express";
 import fs from "fs";
 import path from "path";
@@ -23,8 +23,8 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 // CORS configuration - Allow frontend origin
-app.use(cors({corsOptions}));
-app.use(express.static("public"));
+app.use(cors({ corsOptions }));
+app.use(express.static(path.join(__dirname, "public")));
 // Serve static files from uploads directory
 // This allows images to be accessed at: http://localhost:5000/uploads/posts/image.jpg
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
@@ -41,5 +41,9 @@ const PORT = process.env.APP_PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📡 CORS enabled for: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+  console.log(
+    `📡 CORS enabled for: ${
+      process.env.FRONTEND_URL || "http://localhost:3000"
+    }`
+  );
 });
