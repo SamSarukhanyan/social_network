@@ -1,6 +1,6 @@
+#frontend/.gitignore
 # Node modules
 node_modules/
-frontend
 # Environment variables
 .env
 .env.local
