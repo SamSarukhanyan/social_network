@@ -24,12 +24,15 @@ app.use(express.urlencoded());
 
 // CORS configuration - Allow frontend origin
 app.use(cors(corsOptions));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "../public")));
 // Serve static files from uploads directory
 // This allows images to be accessed at: http://localhost:5000/uploads/posts/image.jpg
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 loadRoutes(app);
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
+});
 app.use(multerErrorHandler);
 app.use(errorMiddleware);
 fs.mkdirSync("uploads/posts", { recursive: true });
